@@ -6,6 +6,8 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcFuture;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcInvocation;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcRequestHolder;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.netty.RpcConnection;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.netty.RpcNettyConnection;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -20,12 +22,18 @@ public class RpcClient {
     private Logger logger = LoggerFactory.getLogger(RpcClient.class);
 
     private ConnecManager connectManager;
+    RpcConnection rpc;
 
     public RpcClient(IRegistry registry){
-        this.connectManager = new ConnecManager();
+        int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
+        this.rpc = new RpcNettyConnection("127.0.0.1",port);
     }
 
     public Object invoke(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+        return rpc.Send(interfaceName,method,parameterTypesString,parameter);
+    }
+
+    public Object invokes(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
 
         Channel channel = connectManager.getChannel();
 
